@@ -1,20 +1,16 @@
 .. NIRVAR documentation master file, created by
-   sphinx-quickstart.
+   sphinx-quickstart on Thu Apr 25 16:20:08 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-NIRVAR documentation!
-==============================================
-
-Contents:
+Welcome to NIRVAR's documentation!
+==================================
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents:
 
-   getting-started
-   commands
-
-
+   src 
 
 Indices and tables
 ==================
