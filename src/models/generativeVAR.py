@@ -19,8 +19,8 @@ class generativeVAR():
                  stock_names : list = None,
                  feature_names : list = None,
                  p_in : float = 0.9,
-                 p_out : float = 0.3,
-                 p_between : float = 0.1,
+                 p_out : float = 0.05,
+                 p_between : float = 0,
                  categories : dict = None,
                  adjacency_matrix : np.ndarray = None, 
                  phi_coefficients : np.ndarray = None,
@@ -29,7 +29,8 @@ class generativeVAR():
                  multiplier : float = 1,
                  global_noise : float = 1,
                  different_innovation_distributions : bool = False,
-                 phi_distribution : np.ndarray = None 
+                 phi_distribution : np.ndarray = None,
+                 t_distribution : bool = False
                  ) -> None:
         """ 
         Parameters
@@ -95,6 +96,9 @@ class generativeVAR():
             A dense array of values for each Phi_{ij}^{(q)}. For example each Phi_{ij}^{(q)} could be drawn 
             from a some distribution that depends on the block membership of i and j. 
 
+        t_distribution : bool
+            Whether you want t distributed innovations instead of normally distributed distributions
+
         Returns
         -------
         None
@@ -109,6 +113,7 @@ class generativeVAR():
         self.multiplier = multiplier
         self.different_innovation_distributions = different_innovation_distributions  
         self.global_noise = global_noise 
+        self.t_distribution = t_distribution
 
         if N is None and stock_names is None:
             raise ValueError("You must specify either 'N' or 'stock_names'")
@@ -283,7 +288,6 @@ class generativeVAR():
         phi = (1/abs(np.max(phi_eigs)))*phi
         phi = self.multiplier*phi 
         phi_eigs = np.linalg.eig(phi)[0]
-        # print("LARGEST EIGENVALUE OF PHI:   " + str(max(phi_eigs)))
         phi = np.reshape(phi,(self.N,self.Q,self.N,self.Q),order='F')
         return phi 
     
@@ -313,12 +317,15 @@ class generativeVAR():
         """
         X_stored = np.zeros((self.T,self.N,self.Q))
         X = np.zeros((self.N,self.Q))
-        for t in range(self.T): 
-            Z = self.random_state.normal(0,np.sqrt(self.innovations_variance)) 
-            
-            # If you want the innovations to have a t distribution instead of a normal distribution, uncomment the following line:
-            # Z = t_dist.rvs(df=1,scale=self.global_noise,size=(self.N,self.Q))
+        if t_dist:
+            for t in range(self.T): 
+                Z = t_dist.rvs(df=1,scale=self.global_noise,size=(self.N,self.Q))
+                X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
+                X_stored[t] = X
 
-            X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
-            X_stored[t] = X
+        else:
+            for t in range(self.T): 
+                Z = self.random_state.normal(0,np.sqrt(self.innovations_variance)) 
+                X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
+                X_stored[t] = X
         return X_stored 
