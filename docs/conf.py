@@ -35,6 +35,11 @@ extensions = ["sphinx.ext.todo",
               "sphinx.ext.autodoc",
 ]
 
+autodoc_mock_imports = ['numpy']
+autodoc_mock_imports = ['src.data.make_dataset']
+autodoc_mock_imports = ['src.visualization.visualize']
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
