@@ -8,6 +8,20 @@ the NIRVAR paper.
 
 Note that the financial returns data is too large to store on GitHub. The data is available upon request from b.martin22@imperial.ac.uk.
 
+Installation
+------------
+You can install from pypi.org using 
+`pip install nirvar` 
+
+Alternatively, you can clone the repository using SSH or HTTPS:
+`git clone git@github.com:bmartin9/NIRVAR.git` 
+or 
+`git clone https://github.com/bmartin9/NIRVAR.git`
+
+Once cloned, change to the project root directory and install the nirvar package in edit mode using 
+`pip install -e .` 
+
+
 Project Organization
 ------------
 
