@@ -1,0 +1,13 @@
+name: NIRVAR
+channels:
+  - defaults
+dependencies:
+  - python=3.12.3
+  - sphinx
+  - numpy
+  - scipy
+  - scikit-learn
+  - pip
+  - plotly
+  - pandas
+prefix: /home/bm322/anaconda3/envs/NIRVAR
