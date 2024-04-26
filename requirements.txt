@@ -1,10 +1,67 @@
-# local package
--e .
-
-# external requirements
-click
-Sphinx
-coverage
-awscli
-flake8
-python-dotenv>=0.5.1
+alabaster @ file:///home/ktietz/src/ci/alabaster_1611921544520/work
+Babel @ file:///work/perseverance-python-buildout/croot/babel_1698863996602/work
+Bottleneck @ file:///croot/bottleneck_1709069899917/work
+Brotli @ file:///work/perseverance-python-buildout/croot/brotli-split_1698805593785/work
+certifi @ file:///croot/certifi_1707229174982/work/certifi
+cffi==1.16.0
+charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
+colorama @ file:///work/perseverance-python-buildout/croot/colorama_1698847155966/work
+cryptography==42.0.5
+docutils @ file:///work/perseverance-python-buildout/croot/docutils_1698846509640/work
+idna @ file:///work/perseverance-python-buildout/croot/idna_1698845632828/work
+imagesize @ file:///work/perseverance-python-buildout/croot/imagesize_1698864514488/work
+importlib_metadata==7.1.0
+jaraco.classes==3.4.0
+jaraco.context==5.3.0
+jaraco.functools==4.0.1
+jeepney==0.8.0
+Jinja2 @ file:///work/perseverance-python-buildout/croot/jinja2_1707343043683/work
+joblib @ file:///croot/joblib_1713976767370/work
+keyring==25.1.0
+markdown-it-py==3.0.0
+MarkupSafe @ file:///work/perseverance-python-buildout/croot/markupsafe_1707342994941/work
+mdurl==0.1.2
+mkl-fft @ file:///work/perseverance-python-buildout/croot/mkl_fft_1698845673361/work
+mkl-random @ file:///work/perseverance-python-buildout/croot/mkl_random_1698845720894/work
+mkl-service==2.4.0
+more-itertools==10.2.0
+nh3==0.2.17
+nirvar @ file:///home/bm322/phd/projects/networks/NIRVAR/dist/nirvar-1.0.0-py3-none-any.whl#sha256=470ddbe424cbe4920558f278243ea017fbcc886cd64e5bbf083612b7483cf64a
+numexpr @ file:///work/perseverance-python-buildout/croot/numexpr_1698871031164/work
+numpy @ file:///croot/numpy_and_numpy_base_1708638617955/work/dist/numpy-1.26.4-cp312-cp312-linux_x86_64.whl#sha256=1d700f51d8b4fa684d858c9e3b56b1656bc5c82b6b79ff08d4e3b491c430059f
+packaging @ file:///croot/packaging_1710807400464/work
+pandas @ file:///croot/pandas_1709590491089/work/dist/pandas-2.2.1-cp312-cp312-linux_x86_64.whl#sha256=5802047a01a8af8f4a2d6aa0e3e9e6a659b7dcb47f027e62c94eab8c10d85ba7
+pkginfo==1.10.0
+plotly @ file:///work/perseverance-python-buildout/croot/plotly_1712350933756/work
+pycparser==2.22
+Pygments @ file:///work/perseverance-python-buildout/croot/pygments_1698846270603/work
+PySocks @ file:///work/perseverance-python-buildout/croot/pysocks_1698845478203/work
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pytz @ file:///croot/pytz_1713974312559/work
+readme_renderer==43.0
+requests @ file:///croot/requests_1707355572290/work
+requests-toolbelt==1.0.0
+rfc3986==2.0.0
+rich==13.7.1
+scikit-learn @ file:///work/perseverance-python-buildout/croot/scikit-learn_1698865753889/work
+scipy @ file:///croot/scipy_1710947333060/work/dist/scipy-1.12.0-cp312-cp312-linux_x86_64.whl#sha256=68ddf853c338a42d9bfea9e41f301327ac0c16ab685e3d12b6fc17bce5b92ab4
+SecretStorage==3.3.3
+setuptools==68.2.2
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+snowballstemmer @ file:///tmp/build/80754af9/snowballstemmer_1637937080595/work
+Sphinx @ file:///work/perseverance-python-buildout/croot/sphinx_1698874522522/work
+sphinx-rtd-theme==2.0.0
+sphinxcontrib-applehelp @ file:///home/ktietz/src/ci/sphinxcontrib-applehelp_1611920841464/work
+sphinxcontrib-devhelp @ file:///home/ktietz/src/ci/sphinxcontrib-devhelp_1611920923094/work
+sphinxcontrib-htmlhelp @ file:///tmp/build/80754af9/sphinxcontrib-htmlhelp_1623945626792/work
+sphinxcontrib-jquery==4.1
+sphinxcontrib-jsmath @ file:///home/ktietz/src/ci/sphinxcontrib-jsmath_1611920942228/work
+sphinxcontrib-qthelp @ file:///home/ktietz/src/ci/sphinxcontrib-qthelp_1611921055322/work
+sphinxcontrib-serializinghtml @ file:///tmp/build/80754af9/sphinxcontrib-serializinghtml_1624451540180/work
+tenacity @ file:///work/perseverance-python-buildout/croot/tenacity_1698863691366/work
+threadpoolctl @ file:///Users/ktietz/demo/mc3/conda-bld/threadpoolctl_1629802263681/work
+twine==5.0.0
+tzdata @ file:///croot/python-tzdata_1690578112552/work
+urllib3 @ file:///croot/urllib3_1707770551213/work
+wheel==0.41.2
+zipp==3.18.1
