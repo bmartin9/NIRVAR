@@ -21,6 +21,15 @@ or
 Once cloned, change to the project root directory and install the nirvar package in edit mode using 
 `pip install -e .` 
 
+Usage
+------------
+If you have installed using pip, you can import classes and functions using, for example 
+`from nirvar.models import train_model` 
+
+If you have cloned the repository from GitHub and installed it in editable mode, use `src` instead of `nirvar`. For example,
+`from src.models import train_model`
+
+
 
 Project Organization
 ------------
