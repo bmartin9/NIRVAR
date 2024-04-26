@@ -1,0 +1,9 @@
+###### PARAMETERS #######
+SEED : 352
+N : 150
+T : 1000
+Q : 1
+B : 10
+spectral_radius : 0.9 
+p_in : 1
+p_out : 0 

@@ -1,0 +1,7 @@
+{
+'SEED':'4436'
+'n_backtest_days_total':'10'
+'first_prediction_day':'443'
+'Q':'1'
+'target_feature':'1'
+}

@@ -9,6 +9,74 @@ from scipy.stats import invgamma
 from scipy.stats import t as t_dist
 
 class generativeVAR():
+    """ 
+    :param random_state: Random State object. The seed value is set by the user upon instantiation of the Random State object.
+    :type random_state: np.random.RandomState
+
+    :param T: Number of observations (time points)
+    :type T: int
+
+    :param N: Number of Stocks
+    :type N: int
+
+    :param Q: Number of Features
+    :type Q: int
+
+    :param stock_names: List of stock names 
+    :type stock_names: list
+
+    :param feature_names: A list of feature names 
+    :type feature_names: list
+
+    :param B: The number of blocks in the SBM 
+    :type B: int
+
+    :param p_in: Probability of an edge forming between two in the same group for a particular feature
+    :type p_in: float
+
+    :param p_out: Probability of an edge forming between two in the different group for a particular feature
+    :type p_out: float
+
+    :param p_between: Probability of an edge forming between two over different features
+    :type p_between: float
+
+    :param categories: Dictionary with keys being the stock names and values being the corresponding groups
+    :type categories: dict
+
+    :param adjacency_matrix: Shape = (N,Q,N,Q). Gives the connections between stock-features. Entries are 1s or 0s.
+    :type adjacency_matrix: np.ndarray
+
+    :param phi_coefficients: Shape = (N,Q,N,Q). Gives the weighted connections between stock-features. Defines the VAR generative model. 
+        Entries are real numbers. Has a spectral radius of <1.
+    :type phi_coefficients: np.ndarray
+
+    :param uniform_range: Distribution from which phi is sampled is U(-uniform_range,uniform_range)
+    :type uniform_range: float
+
+    :param innovations_variance: Variance of innovations, 
+    :type innovations_variance: np.ndarray
+
+    :param multiplier: Spectral radius of Phi
+    :type multiplier: float
+
+    :param global_noise: Variance of each innovation - set this if you want the same std for each stock innovation
+    :type global_noise: float
+
+    :param different_innovation_distributions: If False, the innovation distribution of each stock will be Normal(0,self.global_noise)
+        If True, the innovation distribution of each stock will be Normal(0,sigma) with sigma ~ Inv-Gamma(3,2)
+    :type different_innovation_distributions: bool
+
+    :param phi_distribution: Shape = (NQ,NQ)
+        A dense array of values for each Phi_{ij}^{(q)}. For example each Phi_{ij}^{(q)} could be drawn 
+        from a some distribution that depends on the block membership of i and j. 
+    :type phi_distribution: np.ndarray
+
+    :param t_distribution: Whether you want t distributed innovations instead of normally distributed distributions
+    :type t_distribution: bool
+
+    :return: None
+    :rtype: None
+    """
 
     def __init__(self,
                  random_state : np.random.RandomState,
@@ -32,77 +100,7 @@ class generativeVAR():
                  phi_distribution : np.ndarray = None,
                  t_distribution : bool = False
                  ) -> None:
-        """ 
-        Parameters
-        ----------
-        random_state : np.random.RandomState
-            Random State object. The seed value is set by the user upon instantiation of the Random State object.
-
-        T : int 
-            number of observations (time points)
-
-        N : int
-            Number of Stocks
-
-        Q :int
-            Number of Features
-
-        stock_names: list
-            List of stock names 
-
-        feature_names: list
-            A list of feature names 
-
-        B : int
-            The number of blocks in the SBM 
-
-        p_in : float
-            Probability of an edge forming between two  in the same group for a particular feature
-
-        p_out : float
-            Probability of an edge forming between two  in the different group for a particular feature
-
-        p_between : float 
-            Probability of an edge forming between two  over different features
-
-        categories : dict
-            Dictionary with keys being the stock names and values being the corresponding groups
-
-        adjacency_matrix : np.ndarray
-            Shape = (N,Q,N,Q). Gives the connections between stock-features. Entries are 1s or 0s. 
-
-        phi_coefficients : np.ndarray
-            Shape = (N,Q,N,Q). Gives the weighted connections between stock-features. Defines the VAR generative model. 
-            Entries are real numbers. Has a spectral radius of <1. 
-        
-        uniform_range : float
-            distribution from which phi is sampled is U(-uniform_range,uniform_range)
-
-        innovations_variance : np.ndarray
-            variance of innovations, Z_t 
-
-        multiplier : float 
-            spectral radius of Phi
-
-        global_noise : float
-            VARIANCE of each innovation - set this if you want the same std for each stock innovation
-
-        different_innovation_distributions 
-            If False, the innovation distribution of each stock will be Normal(0,self.global_noise)
-            If True, the innovation distribution of each stock will be Normal(0,sigma) with sigma ~ Inv-Gamma(3,2)
-
-        phi_distribution : np.ndarray
-            Shape = (NQ,NQ)
-            A dense array of values for each Phi_{ij}^{(q)}. For example each Phi_{ij}^{(q)} could be drawn 
-            from a some distribution that depends on the block membership of i and j. 
-
-        t_distribution : bool
-            Whether you want t distributed innovations instead of normally distributed distributions
-
-        Returns
-        -------
-        None
-        """
+ 
         self.random_state = random_state
         self.T = T 
         self.B = B
@@ -210,10 +208,9 @@ class generativeVAR():
     
     def blocks(self) -> np.ndarray:
         """
-        Returns
-        -------
-        blocks : np.ndarray
-            Shape = (N,N). Represents the blocks defined by self.categories as a binary matrix
+
+        :return: blocks. Shape = (N,N). Represents the blocks defined by self.categories as a binary matrix
+        :rtype: np.ndarray
         """
         SBM_groupings_matrix = np.zeros((self.N,self.N))
         SBM_groupings_values = list(self.categories.values())
@@ -227,13 +224,13 @@ class generativeVAR():
     
     def adjacency(self) -> np.ndarray:
         """ 
-        Returns
-        -------
-        adjacency_matrix : np.ndarray
+
+        :returns: adjacency_matrix 
             Shape = (N,Q,N,Q). Gives the adjacency matrix of the SBM defined by self.categories. 
             Connections within blocks are 1 with probability p_in.
             Connections in different blocks are 1 with probability p_out. 
             Connections between different features are 1 with probability p_between.
+        :rtype: np.ndarray
         """
         blocks = self.blocks() 
         block_probabilities = np.where(blocks==1,self.p_in,self.p_out)
@@ -245,10 +242,9 @@ class generativeVAR():
     
     def manual_categories(self):
         """ 
-        Returns
-        -------
-        cat : dict
+        :return: cat
             keys are the stock names, values are the block memberships
+        :rtype: dict
         """
         vals = sorted([x%self.B for x in range(self.N)])
         keys = [str(x) for x in range(self.N)]
@@ -257,11 +253,10 @@ class generativeVAR():
  
     def phi_blocks_distribution(self):
         """ 
-        Returns
-        -------
-        phi_dense : np.ndarray 
+        :return:  phi_dense.
             Shape = (NQ,NQ)
             Each Phi_{ij} ~ N(mean,1) where mean depends on the block membership of node i
+        :rtype: np.ndarray
         """
         phi_dense = np.zeros((self.N,self.Q,self.N,self.Q))
         random_negative_mean = self.random_state.binomial(1,0.5,size=(self.B))
@@ -275,11 +270,10 @@ class generativeVAR():
 
     def phi(self) -> np.ndarray:
         """
-        Returns
-        -------
-        phi : np.ndarray
+        :return: phi 
             Shape = (N,Q,N,Q). Keeping zero edges, sample phi from a uniform distribution such that 
             the spectral radius of phi is <1 (for stationary solution of VAR model).
+        :rtype: np.ndarray
         """
         connections = self.adjacency_matrix 
         connections = np.reshape(connections,(self.N*self.Q,self.N*self.Q),order='F')  
@@ -293,13 +287,9 @@ class generativeVAR():
     
     def innovations_var(self) -> np.ndarray: 
         """ 
-        Parameters
-        ----------
-
-        Returns
-        -------
-        var : np.ndarray
+        :return: var 
             Shape = (N,Q). Variance for each innovation
+        :rtype: np.ndarray
         """
         if self.different_innovation_distributions:
             var = invgamma.rvs(a=3,loc=0,scale=2,size=(self.N,self.Q),random_state=self.random_state)
@@ -310,10 +300,9 @@ class generativeVAR():
 
     def generate(self) -> np.ndarray: 
         """ 
-        Returns
-        -------
-        X_stored : np.ndarray
+        :return: X_stored 
             Shape = (T,N,Q). Generated Time Series from VAR model.
+        :rtype: np.ndarray
         """
         X_stored = np.zeros((self.T,self.N,self.Q))
         X = np.zeros((self.N,self.Q))

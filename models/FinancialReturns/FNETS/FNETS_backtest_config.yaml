@@ -1,0 +1,7 @@
+###### PARAMETERS #######
+SEED : 4436
+Q : 4
+n_backtest_days : 4275
+first_prediction_day : 1004
+target_feature : 1
+lookback_window : 504

@@ -358,16 +358,13 @@ class fit():
         Turn a 1d array of integers (groupings) into a 2d binary array, A, where 
         A[i,j] = 1 iff i and j have the same integer value in the 1d groupings array.
 
-        Parameters
-        ----------
-        input_array : np.ndarray
-            1d array of integers.
+        :param input_array: 1d array of integers.
+        :type input_array: np.ndarray
 
-        Returns
-        -------
-        A : np.ndarray
-            2d Representation. Shape = (len(input_array),len(input_array))
+        :return: 2d Representation. Shape = (len(input_array),len(input_array))
+        :rtype: np.ndarray
         """
+
         L = len(input_array)
         A = np.zeros((L,L)) 
         for i in range(L):
@@ -385,17 +382,12 @@ class fit():
 
         Parameters
         ----------
-        k : int 
-            the number of clusters 
+        :param k: the number of clusters 
+        :type k: int
 
-        Returns
-        -------
-        constrained_distances : np.ndarray
-            A binary array with value 1 for the neighbouring stocks in the same cluster and 0 otherwise
-            Shape = (Q,N,N) 
-
-        all_labels : np.ndarray
-            Array of integers where each integer labels a kmeans cluster. Shape = (Q,N) 
+        :return: A list with the first element being a binary array with value 1 for the neighbouring stocks in the same cluster and 0 otherwise
+          having shape = (Q,N,N)  The second element is an array of integers where each integer labels a kmeans cluster. Shape = (Q,N) 
+        :rtype: list
         """
         constrained_distances = np.zeros((self.Q,self.N,self.N))
         all_labels = np.zeros((self.Q,self.N))
@@ -409,80 +401,64 @@ class fit():
 
         return constrained_distances , all_labels 
     
-    def gmm(self,k : int) -> np.ndarray:
-        """ 
-        GMM clustering. Number of clusters must be pre specified. EM algorithm is then run.
-
-        Parameters
-        ----------
-        k : int 
-            the number of clusters 
-
-        Returns
-        -------
-        constrained_distances : np.ndarray
-            A binary array with value 1 for the neighbouring stocks in the same cluster and 0 otherwise
-            Shape = (Q,N,N) 
-
-        all_labels : np.ndarray
-            Array of integers where each integer labels a kmeans cluster. Shape = (Q,N) 
+    def gmm(self, k: int) -> np.ndarray:
         """
-        constrained_distances = np.zeros((self.Q,self.N,self.N))
-        all_labels = np.zeros((self.Q,self.N))
-        for q in range(self.Q): 
-            feature_embedding = self.embedded_array[q,:,:]
+        GMM clustering. Number of clusters must be pre-specified. EM algorithm is then run.
+
+        :param k: The number of clusters.
+        :type k: int
+
+        :return: A binary array with value 1 for the neighboring stocks in the same cluster and 0 otherwise.
+                    Shape = (Q, N, N)
+        :rtype: np.ndarray
+
+        :return: Array of integers where each integer labels a k-means cluster. Shape = (Q, N)
+        :rtype: np.ndarray
+        """
+        constrained_distances = np.zeros((self.Q, self.N, self.N))
+        all_labels = np.zeros((self.Q, self.N))
+        for q in range(self.Q):
+            feature_embedding = self.embedded_array[q, :, :]
             gmm_labels = GaussianMixture(n_components=k, random_state=self.kmeans_random, init_params='k-means++').fit_predict(feature_embedding)
             labels = gmm_labels
             all_labels[q] = labels
-            similarity_matrix = self.groupings_to_2D(labels) 
+            similarity_matrix = self.groupings_to_2D(labels)
             constrained_distances[q] = similarity_matrix
 
-        return constrained_distances , all_labels 
+        return constrained_distances, all_labels
     
-    def full_UASE_gmm(self,k : int) -> np.ndarray:
-        """ 
+    def full_UASE_gmm(self, k: int) -> np.ndarray:
+        """
         GMM clustering. Multiple features are clustered at once. Number of clusters must be pre specified. EM algorithm is then run.
 
-        Parameters
-        ----------
-        k : int 
-            the number of clusters 
+        :param k: The number of clusters
+        :type k: int
 
-        Returns
-        -------
-        constrained_distances : np.ndarray
-            A binary array with value 1 for the neighbouring stocks in the same cluster and 0 otherwise
-            Shape = (Q,N,N) 
+        :return: A binary array with value 1 for the neighbouring stocks in the same cluster and 0 otherwise (Shape = (Q,N,N))
+        :rtype: np.ndarray
 
-        all_labels : np.ndarray
-            Array of integers where each integer labels a kmeans cluster. Shape = (Q,N) 
+        :return: Array of integers where each integer labels a kmeans cluster (Shape = (Q,N))
+        :rtype: np.ndarray
         """
-
-        feature_embedding = self.embedded_array #shape = (Q,N,d) 
-        feature_embedding = np.reshape(feature_embedding,(self.Q*self.N,self.UASE_dim)) #shape = (Q*N,d)    
+        feature_embedding = self.embedded_array  # shape = (Q,N,d)
+        feature_embedding = np.reshape(feature_embedding, (self.Q * self.N, self.UASE_dim))  # shape = (Q*N,d)
         gmm_labels = GaussianMixture(n_components=k, random_state=self.kmeans_random, init_params='k-means++').fit_predict(feature_embedding)
         labels = gmm_labels
         similarity_matrix = self.groupings_to_2D(labels)
-        all_labels = np.reshape(labels,(self.Q,self.N)) 
-        target_similarity = similarity_matrix[self.target_feature*self.N:self.target_feature*self.N + self.N,:] #we only care about the predictors of the target feature
-        constrained_distances = np.reshape(target_similarity,(self.N,self.Q,self.N)).transpose(1,0,2)   #shape = (Q,N,N) 
-        return constrained_distances , all_labels
+        all_labels = np.reshape(labels, (self.Q, self.N))
+        target_similarity = similarity_matrix[self.target_feature * self.N:self.target_feature * self.N + self.N, :]  # we only care about the predictors of the target feature
+        constrained_distances = np.reshape(target_similarity, (self.N, self.Q, self.N)).transpose(1, 0, 2)  # shape = (Q,N,N)
+        return constrained_distances, all_labels
         
 
     def covariates(self,constrained_array : np.ndarray) -> np.ndarray: 
         """ 
-        Parameters
-        ----------
-        constrained_array : np.ndarray
-            Shape = (Q,N,N)
-            Some constraint on which neighbours to sum up to get a predictor along that feature.
+        :param constrained_array: Shape = (Q,N,N) Some constraint on which neighbours to sum up to get a predictor along that feature.
+        :type: np.ndarray 
 
-        Returns
-        -------
-        covariates : np.ndarray 
-            Shape = (N,N,Q,T_train) 
-            For each stock, we have a maximum (this max is not reached do to clustering regularisation) of NQ
-            predictors. There are T_train training values for each predictor.
+        :rtype: np.ndarray 
+        :return: Shape = (N,N,Q,T_train) For each stock, we have a maximum (this max is not reached do to clustering regularisation) of NQ predictors. There are T_train training values for each predictor.
+        :rtype: np.ndarray 
         """
         covariates = np.zeros((self.N,self.N,self.Q,self.T_train),dtype=np.float32)
         for i in range(self.N):
@@ -493,15 +469,11 @@ class fit():
     
     def ols_parameters(self,constrained_array : np.ndarray) -> np.ndarray:
         """ 
-        Parameters
-        ----------
-        constrained_array : np.ndarray
-            Some constraint on which neighbours to sum up to get a predictor along that feature. Shape= (Q,N,N)
+        :param constrained_array: Some constraint on which neighbours to sum up to get a predictor along that feature. Shape= (Q,N,N)
+        :type: np.ndarray
 
-        Returns
-        -------
-        ols_params  : np.ndarray 
-            Shape = (N,N,Q)
+        :return: ols_params Shape = (N,N,Q)
+        :rtype: np.ndarray
         """
         ols_params = np.zeros((self.N,self.N*self.Q)) 
         covariates = self.covariates(constrained_array=constrained_array)
@@ -519,15 +491,11 @@ class fit():
     
     def lasso_parameters(self,constrained_array : np.ndarray) -> np.ndarray:
         """ 
-        Parameters
-        ----------
-        constrained_array : np.ndarray
-            Some constraint on which neighbours to sum up to get a predictor along that feature. Shape= (Q,N,N)
+        :param constrained_array: Some constraint on which neighbours to sum up to get a predictor along that feature. Shape= (Q,N,N)
+        :type: np.ndarray
 
-        Returns
-        -------
-        lasso_params  : np.ndarray 
-            Shape = (N,N,Q)
+        :return: lasso_params Shape = (N,N,Q)
+        :rtype: np.ndarray
         """
         lasso_params = np.zeros((self.N,self.N*self.Q)) 
         covariates = self.covariates(constrained_array=constrained_array)
@@ -546,22 +514,16 @@ class fit():
     def covariates_subset(self,constrained_array : np.ndarray, subset_to_predict : np.ndarray) -> np.ndarray: 
         """ 
         Find the covariates for only a subset of the N panel components.
-        Parameters
-        ----------
-        constrained_array : np.ndarray
-            Shape = (Q,N,N)
-            Some constraint on which neighbours to sum up to get a predictor along that feature.
 
-        subset_to_predict : np.ndarray
-            An M dimensional array of indices. Must be a subset of {0,...,(N-1)} 
+        :param constrained_array: Some constraint on which neighbours to sum up to get a predictor along that feature. Shape = (Q,N,N)
+        :type: np.ndarray
 
-        Returns
-        -------
-        covariates : np.ndarray 
-            Shape = (N,N,Q,T_train) 
-            For each stock, we have a maximum (this max is not reached do to clustering regularisation) of NQ
-            predictors. There are T_train training values for each predictor. 
-            Only stocks in subset_to_predict will be non zero 
+        :param subset_to_predict: An M dimensional array of indices. Must be a subset of {0,...,(N-1)}
+        :type: np.ndarray
+
+        :return: covariates. Shape = (N,N,Q,T_train) For each stock, we have a maximum (this max is not reached do to clustering regularisation) of NQ predictors. There are T_train training values for each predictor. Only stocks in subset_to_predict will be non zero
+        :rtype: np.ndarray
+
         """
         covariates = np.zeros((self.N,self.N,self.Q,self.T_train),dtype=np.float32)
         for i in range(self.N): 
@@ -574,18 +536,15 @@ class fit():
     def ols_parameters_subset(self,constrained_array : np.ndarray, subset_to_predict : np.ndarray) -> np.ndarray:
         """ 
         Do OLS only on a subset of the N panel components.
-        Parameters
-        ----------
-        constrained_array : np.ndarray
-            Some constraint on which neighbours to sum up to get a predictor along that feature. Shape= (Q,N,N)
 
-        subset_to_predict : np.ndarray
-            An M dimensional array of indices. Must be a subset of {0,...,(N-1)} 
+        :param constrained_array: Some constraint on which neighbours to sum up to get a predictor along that feature. Shape = (Q,N,N)
+        :type: np.ndarray
 
-        Returns
-        -------
-        ols_params  : np.ndarray 
-            Shape = (N,N,Q)
+        :param subset_to_predict: An M dimensional array of indices. Must be a subset of {0,...,(N-1)}
+        :type: np.ndarray
+
+        :return: ols_params.  Shape = (N,N,Q)
+        :rtype: np.ndarray
         """
         ols_params = np.zeros((self.N,self.N*self.Q)) 
         covariates = self.covariates_subset(constrained_array=constrained_array,subset_to_predict=subset_to_predict)

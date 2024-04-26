@@ -1,0 +1,11 @@
+###### PARAMETERS #######
+SEED : 4436
+Q : 4
+n_backtest_days : 4275
+first_prediction_day : 1004
+target_feature : 1
+SVD_niter : 7 
+SVD_random_state : 435 
+quantile : 1 #The top quantile stocks with the strongest predictions  
+embedding_method : 'Pearson Correlation' #One of 'Pearson Correlation' (Default), 'Precision Matrix', 'Spearman Correlation', 'Kendall Correlation', 'Covariance Matrix"
+lookback_window : 1004 
