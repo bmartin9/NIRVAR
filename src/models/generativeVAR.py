@@ -306,7 +306,7 @@ class generativeVAR():
         """
         X_stored = np.zeros((self.T,self.N,self.Q))
         X = np.zeros((self.N,self.Q))
-        if t_dist:
+        if self.t_distribution:
             for t in range(self.T): 
                 Z = t_dist.rvs(df=1,scale=self.global_noise,size=(self.N,self.Q))
                 X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
