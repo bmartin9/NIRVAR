@@ -27,10 +27,10 @@ target_feature <- yaml_data$target_feature
 lookback_window <- yaml_data$lookback_window
 
 ###### ENVIRONMENT VARIABLES ###### 
-PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
-NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
-# PBS_ARRAY_INDEX = 1
-# NUM_ARRAY_INDICES = 2016
+# PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
+# NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
+PBS_ARRAY_INDEX = 1
+NUM_ARRAY_INDICES = 4275
 
 # Re-define n_backtest_days to be total number of backtesting days divided by the number of array indices 
 n_backtest_days <- as.integer(n_backtest_days_total/NUM_ARRAY_INDICES) 

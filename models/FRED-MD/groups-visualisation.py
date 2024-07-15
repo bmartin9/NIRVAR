@@ -142,18 +142,6 @@ fig = px.bar(df, x="EstimatedCluster", y="Count", color="SectorNames",color_disc
 
 dfs = df.groupby("EstimatedCluster").sum()
 
-# fig.add_trace(go.Scatter(
-#     x=dfs.index, 
-#     y=dfs['Count'],
-#     text=dfs['Count'],
-#     mode='text',
-#     textposition='top center',
-#     textfont=dict(
-#         size=12,
-#     ),
-#     showlegend=False
-# ))
-
 layout = go.Layout(
     yaxis=dict( showline=True, linewidth=1, linecolor='black',ticks='outside',mirror=True),
     xaxis=dict(showline=True, linewidth=1, linecolor='black',ticks='outside',mirror=True,automargin=True),

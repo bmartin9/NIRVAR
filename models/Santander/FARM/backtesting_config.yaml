@@ -1,0 +1,7 @@
+###### PARAMETERS #######
+SEED : 4436
+n_backtest_days : 30
+first_prediction_day : 704 # The day on which you make your first prediction
+lookback_window : 704
+num_lags : 1
+num_factors : 1

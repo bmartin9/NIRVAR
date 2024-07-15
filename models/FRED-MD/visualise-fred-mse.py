@@ -20,7 +20,6 @@ N = Xs.shape[1]
 
 print(Xs.shape)
 IP_targets = Xs[480:,5] 
-print(IP_targets[:6])
 
 def read_csv_files(argv):
     arrays_list = []

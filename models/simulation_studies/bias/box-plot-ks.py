@@ -1,10 +1,20 @@
+""" 
+Script to produce a boxplot of the KS statistic between the empirical distribution of NIRVAR estimates 
+and the asymptotic distribution.
+"""
+
+#!/usr/bin/env python3
+# USAGE: ./box-plot-ks.py ks_statistic.csv
+
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import time 
+import sys 
 
 # Read data from the CSV file
-file_path = 'ks_statistic.csv'
+file_path = sys.argv[1] 
 data = pd.read_csv(file_path, header=None)
 
 colors = [

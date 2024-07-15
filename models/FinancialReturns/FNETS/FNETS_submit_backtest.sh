@@ -9,7 +9,7 @@ module load anaconda3/personal
 source activate RegularisedVAR
 
 export DESIGN_FILE='../../data/processed/stocks_no_market_cleaned.csv'
-export OUTPUT_DIRECTORY='0.5-fnets-unrestricted-ic-504'
+export OUTPUT_DIRECTORY='output'
 cd $PBS_O_WORKDIR
 make predictions-$PBS_ARRAY_INDEX.csv BACKTEST_DESIGN=$DESIGN_FILE ARRAY_INDEX=$PBS_ARRAY_INDEX OUTPUT_DIR=$OUTPUT_DIRECTORY
 

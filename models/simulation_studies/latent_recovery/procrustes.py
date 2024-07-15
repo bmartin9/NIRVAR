@@ -1,3 +1,7 @@
+""" 
+Script containing class to do Procrustes Alignment 
+"""
+
 #!/usr/bin/env python3 
 # USAGE: ./procrustes.py 
 
