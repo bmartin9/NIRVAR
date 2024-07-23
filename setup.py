@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setup(
     name='nirvar',
     packages=find_packages(),
-    version='1.0.0',
+    version='1.1.0',
     description='Network Informed Restricted Vector Autoregression',
     author='Brendan Martin',
     license='MIT',
