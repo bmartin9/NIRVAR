@@ -270,7 +270,7 @@ class fit():
                 alpha : float = 0.4,
                 lookback_window : int = 1,
                 weights : np.ndarray = None,
-                kmeans_random : int = 253,
+                kmeans_random : int = 1,
                 ) -> None:
 
         self.embedded_array = embedded_array

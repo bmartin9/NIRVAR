@@ -50,10 +50,10 @@ target_feature <- yaml_data$target_feature
 lookback_window <- yaml_data$lookback_window
 
 ###### ENVIRONMENT VARIABLES ###### 
-PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
-NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
-# PBS_ARRAY_INDEX = 1
-# NUM_ARRAY_INDICES = 1
+# PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
+# NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
+PBS_ARRAY_INDEX = 1
+NUM_ARRAY_INDICES = 1
 
 # Re-define n_backtest_days to be total number of backtesting days divided by the number of array indices 
 n_backtest_days <- as.integer(n_backtest_days_total/NUM_ARRAY_INDICES) 
@@ -82,7 +82,7 @@ factors <- matrix(NA, nrow = n_backtest_days, ncol = 1)
 for (index in 1:n_backtest_days){
     t <- days_to_backtest[[index]] 
     todays_date <- first_prediction_day + t 
-    print(index)
+    # print(index)
     furthest_lookback_day <- todays_date - lookback_window +1
     X_train <- Xs[furthest_lookback_day:(todays_date),] 
     X_train <- data.matrix(X_train)
@@ -90,7 +90,6 @@ for (index in 1:n_backtest_days){
     X_train_scaled <- scaled_list$scaled_data
     X_train_min <- scaled_list$min_val
     X_train_max <- scaled_list$max_val 
-    print(dim(X_train_scaled))
     col_means <- colMeans(X_train_scaled)
     X_train_scaled <- sweep(X_train_scaled,2,col_means,FUN = "-") 
     fit_fnets <- fnets(x=X_train_scaled,
@@ -103,7 +102,6 @@ for (index in 1:n_backtest_days){
                     do.lrpc = FALSE,
                     ) 
     print(fit_fnets$q)
-    print(object.size(fit_fnets)) 
     factors[index,1] <- fit_fnets$q 
     pr <- predict(fit_fnets, n.ahead = 1,fc.restricted = FALSE)
     predictions_matrix <- pr$forecast  
