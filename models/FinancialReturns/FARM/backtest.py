@@ -34,7 +34,7 @@ lookback_window = config['lookback_window']
 # PBS_ARRAY_INDEX = int(os.environ['PBS_ARRAY_INDEX'])
 PBS_ARRAY_INDEX = 1
 # NUM_ARRAY_INDICES = int(os.environ['NUM_ARRAY_INDICES'])
-NUM_ARRAY_INDICES = 4275
+NUM_ARRAY_INDICES = 1
 
 # Re-define n_backtest_days to be total number of backtesting days divided by the number of array indices 
 n_backtest_days = int(n_backtest_days_tot/NUM_ARRAY_INDICES)

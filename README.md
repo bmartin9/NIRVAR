@@ -4,7 +4,7 @@ NIRVAR
 Network Informed Restricted Vector Autoregression
 
 This repository contains the code and data used to obtain simulation study and applications results for 
-the NIRVAR paper.
+"NIRVAR: Network Informed Restricted Vector Autoregression". The arXiv preprint is available at [https://www.arxiv.org/pdf/2407.13314](https://www.arxiv.org/pdf/2407.13314). 
 
 Note that the financial returns data is too large to store on GitHub. The data is available upon request from b.martin22@imperial.ac.uk.
 
@@ -25,6 +25,10 @@ Once cloned, change to the project root directory and install the nirvar package
 
 `pip install -e .` 
 
+The package dependencies are listed in `environment.yaml` and can be installed using conda:
+
+`conda env create --name envname -f environment.yaml` 
+
 Usage
 ------------
 If you have installed using pip, you can import classes and functions using, for example 
@@ -44,7 +48,7 @@ Project Organization
     ├── Makefile           <- Makefile based on cookiecutter data-science template
     ├── README.md          <- The top-level README for developers using this project.
     ├── data
-    │   ├── generated      <- Data generated from simulation studies
+    │   ├── generated      <- Data generated from simulation studies as well as the predictions of NIRVAR/FARM/FNETS/GNAR on each application
     │   ├── processed      <- Transformed data used for model training
     │   └── raw            <- The original, immutable data dump.
     │
@@ -69,17 +73,18 @@ Project Organization
     │   │   └── train_model.py
         |   └── predict_model.py
     │   │
-    │   └── visualization  <- Scripts to visualize results 
-    │       └── 0.3-ARI-comparisons.py
-    │       └── 0.3-embedding-dim.py
-    │       └── 0.3-SICCD-bars-plot.py
-    │       └── 0.3-turnover.py
-    │       └── 0.3-visualise-backtesting.py
-    │       └── factors_over_time.py
+    │   └── visualization  <- Utility functions used to visualize results 
     │       └── utility_funcs.py
     │
     └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
 
 
---------
+-------- 
+
+Example Notebook
+----------------
+`./notebooks/NIRVAR_example_usage.ipynb` is a Jupyter notebook that gives an example of how to simulate from the NIRVAR model and do NIRVAR estimation. 
+
+
+
 

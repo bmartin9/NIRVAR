@@ -5,3 +5,4 @@ n_backtest_days : 30
 first_prediction_day : 705
 target_feature : 1
 lookback_window : 705
+FNETS_restricted : FALSE 

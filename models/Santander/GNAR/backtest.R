@@ -50,14 +50,13 @@ lookback_window <- yaml_data$lookback_window
 
 
 ###### ENVIRONMENT VARIABLES ###### 
-PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
-NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
-# PBS_ARRAY_INDEX = 1
-# NUM_ARRAY_INDICES = 1
+# PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
+# NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
+PBS_ARRAY_INDEX = 1
+NUM_ARRAY_INDICES = 1
 
 # Re-define n_backtest_days to be total number of backtesting days divided by the number of array indices 
 n_backtest_days <- as.integer(n_backtest_days_total/NUM_ARRAY_INDICES) 
-print(n_backtest_days_total)
 
 # Get a list of days to do backtesting on
 days_to_backtest <- 1:n_backtest_days + (n_backtest_days * (PBS_ARRAY_INDEX - 1)) - 1 
@@ -68,7 +67,6 @@ design_matrix_file <- commandArgs(trailingOnly = TRUE)[3]
 # Read the design matrix
 Xs <- read.csv2(design_matrix_file,sep=",",dec = ".",header=FALSE)
 Xs[] <- lapply(Xs, as.numeric)
-print(Xs[1,6])
 
 # Get dimensions
 T <- nrow(Xs)
@@ -88,7 +86,7 @@ is_symmetric <- function(matrix) {
 #   return(identical(matrix, t(matrix)))
   return(all(matrix == t(matrix)))
 }
-is_symmetric(adjacency_matrix)
+# is_symmetric(adjacency_matrix)
 
 sic_net <- graph_from_adjacency_matrix(adjacency_matrix, 'undirected')
 gnar_net <- igraphtoGNAR(sic_net)
@@ -116,7 +114,7 @@ for (index in 1:n_backtest_days){
                     betaOrder = c(1),
                     globalalpha = TRUE
                     )
-    print(object.size(fit_gnar)) 
+    # print(object.size(fit_gnar)) 
     predictions <- predict(fit_gnar, n.ahead = 1)
     # predictions_scaled <- predict(fit_gnar, n.ahead = 1)
     # predictions_scaled <- sweep(predictions_scaled,2,col_means,FUN = "+") 

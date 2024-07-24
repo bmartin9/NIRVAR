@@ -61,7 +61,6 @@ for index in range(n_backtest_days):
     # print(todays_date)
     furthest_lookback_day = todays_date - lookback_window 
     X_train = Xs[furthest_lookback_day:todays_date,:] #Shape = (lookback_window,N) 
-    print(X_train.shape)
     # Normalize the data to be in the range [-1,1] 
     scaler = MinMaxScaler(feature_range=(-1,1)) 
     scaler.fit(X_train.reshape((lookback_window,N))) 

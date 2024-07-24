@@ -57,7 +57,7 @@ NUM_ARRAY_INDICES = 1
 
 # Re-define n_backtest_days to be total number of backtesting days divided by the number of array indices 
 n_backtest_days <- as.integer(n_backtest_days_total/NUM_ARRAY_INDICES) 
-print(n_backtest_days)
+# print(n_backtest_days)
 
 # Get a list of days to do backtesting on
 days_to_backtest <- 1:n_backtest_days + (n_backtest_days * (PBS_ARRAY_INDEX - 1)) - 1 

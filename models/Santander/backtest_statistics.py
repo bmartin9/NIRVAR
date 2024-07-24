@@ -55,8 +55,8 @@ def read_csv_files(argv):
 
 predictions_list = read_csv_files(sys.argv) 
 
-targets = Xs[first_prediction_day+1:first_prediction_day+1+n_backtest_days_tot,: ]
-# targets = Xs[first_prediction_day+1:first_prediction_day+1+n_backtest_days_tot,: ] - Xs[first_prediction_day+1 - 1:first_prediction_day+1+n_backtest_days_tot -1,: ]
+# targets = Xs[first_prediction_day+1:first_prediction_day+1+n_backtest_days_tot,: ]
+targets = Xs[first_prediction_day+1:first_prediction_day+1+n_backtest_days_tot,: ] - Xs[first_prediction_day+1 - 1:first_prediction_day+1+n_backtest_days_tot -1,: ]
 
 
 mspe_list = [] 

@@ -46,12 +46,13 @@ first_prediction_day <- yaml_data$first_prediction_day
 Q <- yaml_data$Q 
 target_feature <- yaml_data$target_feature 
 lookback_window <- yaml_data$lookback_window
+FNETS_restricted <- yaml_data$FNETS_restricted
 
 ###### ENVIRONMENT VARIABLES ###### 
-PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
-NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
-# PBS_ARRAY_INDEX = 1
-# NUM_ARRAY_INDICES = 1
+# PBS_ARRAY_INDEX <- as.numeric(Sys.getenv("PBS_ARRAY_INDEX"))
+# NUM_ARRAY_INDICES <- as.numeric(Sys.getenv("NUM_ARRAY_INDICES")) 
+PBS_ARRAY_INDEX = 1
+NUM_ARRAY_INDICES = 1
 
 # Re-define n_backtest_days to be total number of backtesting days divided by the number of array indices 
 n_backtest_days <- as.integer(n_backtest_days_total/NUM_ARRAY_INDICES) 
@@ -87,16 +88,16 @@ for (index in 1:n_backtest_days){
     # print(X_train[todays_date,1])
     X_train_diff <- diff(X_train, lag = 1)
 
-    # scaled_list <- min_max_scaler_matrix(X_train)
-    # X_train_scaled <- scaled_list$scaled_data
-    # X_train_min <- scaled_list$min_val
-    # X_train_max <- scaled_list$max_val 
-    # col_means <- colMeans(X_train_scaled)
-    # X_train_scaled <- sweep(X_train_scaled,2,col_means,FUN = "-") 
+    scaled_list <- min_max_scaler_matrix(X_train)
+    X_train_scaled <- scaled_list$scaled_data
+    X_train_min <- scaled_list$min_val
+    X_train_max <- scaled_list$max_val 
+    col_means <- colMeans(X_train_scaled)
+    X_train_scaled <- sweep(X_train_scaled,2,col_means,FUN = "-") 
 
-    fit_fnets <- fnets(x=X_train_diff,
+    fit_fnets <- fnets(x=X_train_scaled,
                     center = FALSE,
-                    fm.restricted = FALSE,
+                    fm.restricted = FNETS_restricted,
                     q = "ic",
                     var.order = 1,
                     var.method = "lasso",
@@ -106,15 +107,15 @@ for (index in 1:n_backtest_days){
     print(fit_fnets$q)
     print(object.size(fit_fnets)) 
     factors[index,1] <- fit_fnets$q 
-    pr <- predict(fit_fnets, n.ahead = 1,fc.restricted = FALSE)
+    pr <- predict(fit_fnets, n.ahead = 1,fc.restricted = FNETS_restricted)
     predictions_matrix <- pr$forecast  
     # Check if all elements in the matrix are 0
     if(any(predictions_matrix == 0)) {
       print("The predictions matrix contains all 0s.") 
       print(fit_fnets) 
     }  
-    # predictions_matrix <- sweep(predictions_matrix,2,col_means,FUN = "+")
-    # predictions_matrix <- inverse_min_max_scaler_matrix(predictions_matrix,min_vals = X_train_min,max_vals = X_train_max) 
+    predictions_matrix <- sweep(predictions_matrix,2,col_means,FUN = "+")
+    predictions_matrix <- inverse_min_max_scaler_matrix(predictions_matrix,min_vals = X_train_min,max_vals = X_train_max) 
 
     s[index,] <- predictions_matrix 
     # s[index,] <- predictions_matrix + X_train[nrow(X_train),] 
