@@ -259,3 +259,46 @@ def line(error_y_mode=None, **kwargs):
             reordered_data.append(fig.data[i])
         fig.data = tuple(reordered_data)
     return fig
+
+def get_gamma(phi : np.ndarray, noise_variance : float) -> np.ndarray: 
+    """ 
+    Compute the covariance matrix corresponding to a VAR(1) process with VAR coefficient matrix phi and 
+    noise covariance matrix noise_variance*Identity.
+
+    :param: phi: numpy array of dimension (N,N)
+    :type phi: np.ndarray 
+
+    :param noise_variance: scalar noise covariance 
+    :type noise_variance: float 
+    """
+    n = phi.shape[0]
+    sigma = noise_variance*np.identity(n)
+    vec_sigma = np.reshape(sigma,(n**2),order='F')
+    phi_kron = -np.kron(phi,phi)
+    np.fill_diagonal(phi_kron, phi_kron.diagonal() + 1)
+    vec_gamma = np.linalg.inv(phi_kron)@vec_sigma 
+    gamma = np.reshape(vec_gamma,(n,n),order='F')
+    return gamma 
+
+def groupings_to_2D(input_array : np.ndarray) -> np.ndarray:
+        """ 
+        Turn a 1d array of integers (groupings) into a 2d binary array, A, where 
+        A[i,j] = 1 iff i and j have the same integer value in the 1d groupings array.
+
+        :param input_array: 1d array of integers.
+        :type input_array: np.ndarray
+
+        :return: 2d Representation. Shape = (len(input_array),len(input_array))
+        :rtype: np.ndarray
+        """
+
+        L = len(input_array)
+        A = np.zeros((L,L)) 
+        for i in range(L):
+            for j in range(L): 
+                if input_array[i] == input_array[j]:
+                    A[i][j] = int(1) 
+                else:
+                    continue 
+        
+        return A.astype(int)
