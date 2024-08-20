@@ -19,7 +19,7 @@ import sys
 
 ##### PARAMETERS ######
 Q=1
-SEED = 94032
+SEED = 4460
 random_state = default_rng(seed=SEED) 
 spectral_radius = 0.9
 B=5
@@ -54,7 +54,7 @@ step = 0.05
 values = [round(x, 2) for x in range(int(start*100), int(end*100), int(step*100))]
 p_in_list = [x/100 for x in values]
 num_ps = len(p_in_list)
-percentage_sparsity_list = [i*100 for i in p_in_list]
+percentage_sparsity_list = [(100 - i*100) for i in p_in_list]
 
 ###### Estimate Gamma using data ######
 X_backtesting = Xs[first_backtest_month-lookback_window:first_backtest_month+1] 
@@ -95,12 +95,17 @@ for i, p in enumerate(p_in_list):
 
 print(store_diagonal_variances)
 
+###### SAVE VARIANCE RATIOS TO CSV FILE ######
+np.savetxt('variance_ratios_FRED.csv', store_diagonal_variances, delimiter=',', fmt='%d')
+
+# store_diagonal_variances = np.array([133.76891731 ,117.40013067  ,14.35871779 , 14.07329704 ,  7.74235662 , 5.19592178 ,  2.73541633 ,  2.69188702  , 1.47810436 ,  3.80806322 ,1.60654495 ,  1.45981058 ,  1.74764567 ,  1.43468436  , 1.        ])  
+# store_diagonal_variances = np.array([15.09412555 ,15.54891539, 14.84567127 , 7.88519352,  5.33269451,  5.16560115, 3.93751942 , 5.05169452,  2.28574826 , 1.99866704 , 1.45588599,  1.4622407, 1.44568546,  1.06949187,  1.        ])
     
 ###### PLOT LINE PLOT ###### 
 fig = go.Figure()
 fig.add_trace(go.Scatter(
-        x=percentage_sparsity_list, 
-        y=store_diagonal_variances, 
+        x=percentage_sparsity_list[2:], 
+        y=store_diagonal_variances[2:], 
         mode='lines+markers', 
         marker=dict(symbol="circle", size=8)  # Use a different marker for each cluster
     ))
@@ -108,22 +113,39 @@ fig.add_trace(go.Scatter(
 # Set the title and axis labels
 fig.update_layout(
                     xaxis_title='Sparsity level (percentage)',
-                    yaxis_title=r'$\text{tr}(V_{NIRVAR})/\text{tr}(V_{TRUE})$')
+                    yaxis_title=r'$\alpha_{V}$',
+                    xaxis=dict(
+                        dtick=10,  # Set x-axis tick interval to 10
+                        showline=True, 
+                        linewidth=1, 
+                        linecolor='black', 
+                        ticks='outside', 
+                        mirror=True, 
+                        automargin=True
+                    ),
+                    yaxis=dict(
+                        showline=True, 
+                        linewidth=1, 
+                        linecolor='black', 
+                        ticks='outside', 
+                        mirror=True
+                    )
+)
 
+# Set the layout properties
 layout = go.Layout(
-    yaxis=dict(showline=True, linewidth=1, linecolor='black', ticks='outside', mirror=True),
-    xaxis=dict(showline=True, linewidth=1, linecolor='black', ticks='outside', mirror=True, automargin=True),
     paper_bgcolor='white',  # Set background color to white
     plot_bgcolor='white',   # Set plot area color to white
     font_family="Serif", 
-    font_size=11, 
+    font_size=18, 
     margin=dict(l=5, r=5, t=5, b=5),
     width=500, 
     height=350
 )
 fig.update_layout(layout)
 
-fig.write_image(f"FRED_ratio_of_variances.pdf", format='pdf')
+# Save the figure
+fig.write_image("FRED_ratio_of_variances.pdf", format='pdf')
 time.sleep(1)
-fig.write_image(f"FRED_ratio_of_variances.pdf", format='pdf')
+fig.write_image("FRED_ratio_of_variances.pdf", format='pdf')
 

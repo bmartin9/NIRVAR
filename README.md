@@ -39,6 +39,9 @@ If you have cloned the repository from GitHub and installed it in editable mode,
 
 `from src.models import train_model`
 
+Example Notebook
+----------------
+`./notebooks/NIRVAR_example_usage.ipynb` is a Jupyter notebook that gives an example of how to simulate from the NIRVAR model and do NIRVAR estimation. 
 
 
 Project Organization
@@ -81,10 +84,6 @@ Project Organization
 
 -------- 
 
-Example Notebook
-----------------
-`./notebooks/NIRVAR_example_usage.ipynb` is a Jupyter notebook that gives an example of how to simulate from the NIRVAR model and do NIRVAR estimation. 
-
-
-
-
+Constructing Datasets
+------------
+The dataset used for the application to US industrial production was created using the August 2022 vintage of FRED-MD data, available at [https://research.stlouisfed.org/econ/mccracken/fred-databases/](https://research.stlouisfed.org/econ/mccracken/fred-databases/). The recommended fbi package was used to trasform the raw data. The fbi package is availabel at [https://github.com/cykbennie/fbi](https://github.com/cykbennie/fbi). The script used to implement the transformations for this project is `./src/data/transform_raw_data.R`. 
