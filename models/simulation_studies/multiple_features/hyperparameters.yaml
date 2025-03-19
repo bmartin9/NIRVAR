@@ -1,0 +1,9 @@
+###### PARAMETERS #######
+SEED : 4436
+N1 : 400
+T : 20000
+K : 4
+Q : 2 
+block_sizes : [100,100,100,100]
+VAR_spectral_radius : 0.9
+innovations_variance : 1
