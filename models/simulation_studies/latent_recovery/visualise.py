@@ -122,14 +122,14 @@ Y_contour_block2 = X_S_block2_contour_data[:, 1]
 
 # Create a scatter plot for X_S_contour_data in blue
 fig_contour = go.Figure()
-# fig_contour.add_trace(go.Scatter(x=X_contour, y=Y_contour, mode='markers', marker=dict(color=colors[0]), name='$(Y^{(S)})_{i}$'))
+fig_contour.add_trace(go.Scatter(x=X_contour, y=Y_contour, mode='markers', marker=dict(color=colors[0]), name='$\\hat{\\Psi}_{i}$'))
 
-fig_contour.add_trace(go.Scatter(x=X_contour_block1, y=Y_contour_block1, mode='markers', marker=dict(color=colors[0]), name='$(Y^{(S)})_{1:150}$'))
-fig_contour.add_trace(go.Scatter(x=X_contour_block2, y=Y_contour_block2, mode='markers', marker=dict(color=colors[2]), name='$(Y^{(S)})_{151:300}$'))
+# fig_contour.add_trace(go.Scatter(x=X_contour_block1, y=Y_contour_block1, mode='markers', marker=dict(color=colors[0]), name='$\\hat{\\Psi}_{1:150}$'))
+# fig_contour.add_trace(go.Scatter(x=X_contour_block2, y=Y_contour_block2, mode='markers', marker=dict(color=colors[2]), name='$\\hat{\\Psi}_{151:300}$'))
 
 # Create a scatter plot for X_Gamma_contour_loc in red
-fig_contour.add_trace(go.Scatter(x=[X_gt_loc[0]], y=[X_gt_loc[1]], mode='markers', marker=dict(color=colors[1]), name='$(Y_{B})_{1}$'))
-fig_contour.add_trace(go.Scatter(x=[X_gt_loc_block2[0]], y=[X_gt_loc_block2[1]], mode='markers', marker=dict(color=colors[3]), name='$(Y_{B})_{2}$'))
+fig_contour.add_trace(go.Scatter(x=[X_gt_loc[0]], y=[X_gt_loc[1]], mode='markers', marker=dict(color=colors[1]), name='$\\theta_{B1}$'))
+# fig_contour.add_trace(go.Scatter(x=[X_gt_loc_block2[0]], y=[X_gt_loc_block2[1]], mode='markers', marker=dict(color=colors[3]), name='$\\theta_{B2}$'))
 
 layout = go.Layout(
     yaxis=dict(title=r'Second principle direction', showline=True, linewidth=1, linecolor='black',ticks='outside',mirror=True),
@@ -137,7 +137,7 @@ layout = go.Layout(
     paper_bgcolor='white',  # Set background color to white
     plot_bgcolor='white',   # Set plot area color to white
     font_family="Serif", 
-    font_size=11, 
+    font_size=18, 
     margin=dict(l=5, r=5, t=5, b=5),
     width =500, 
     height=350
@@ -154,7 +154,7 @@ corr = np.corrcoef(X_contour,Y_contour)
 
 max_corr = np.max(np.abs(corr))
 fig = px.imshow(corr,zmin=-max_corr,zmax=max_corr,color_continuous_scale='RdBu')
-fig.write_image("correlation_heatmap.eps")
+fig.write_image("correlation_heatmap.pdf")
 
 ###### Create a Q-Q plot ######
 qq_data = stats.probplot((Y_contour_block2-np.mean(Y_contour_block2))/np.std(Y_contour_block2), dist="norm", plot=None)
@@ -167,10 +167,10 @@ y = qq_data[0][1]
 fig_qq = go.Figure()
 
 # Add the reference line
-fig_qq.add_trace(go.Scatter(x=[-3, 3], y=[-3, 3], mode='lines',name=None, showlegend=False, line=dict(color=colors[6])))
+fig_qq.add_trace(go.Scatter(x=[-3, 3], y=[-3, 3], mode='lines',name='$\\mathcal{N}(0,1)$', showlegend=True, line=dict(color=colors[6])))
 
 # Add the Q-Q plot
-fig_qq.add_trace(go.Scatter(x=x, y=y, mode='markers', name='$(Y^{(S)})_{1:75,0}$', marker=dict(color=colors[0])))
+fig_qq.add_trace(go.Scatter(x=x, y=y, mode='markers', name='$\\hat{\\Psi}_{1:75,0}$', marker=dict(color=colors[0])))
 
 
 layout = go.Layout(
@@ -179,7 +179,7 @@ layout = go.Layout(
     paper_bgcolor='white',  # Set background color to white
     plot_bgcolor='white',   # Set plot area color to white
     font_family="Serif", 
-    font_size=11, 
+    font_size=18, 
     margin=dict(l=5, r=5, t=5, b=5),
     width =500, 
     height=350

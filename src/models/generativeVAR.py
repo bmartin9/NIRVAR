@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.decomposition import TruncatedSVD 
 from scipy.stats import invgamma
 from scipy.stats import t as t_dist
+from scipy.stats import multivariate_t 
 
 class generativeVAR():
     """ 
@@ -98,7 +99,8 @@ class generativeVAR():
                  global_noise : float = 1,
                  different_innovation_distributions : bool = False,
                  phi_distribution : np.ndarray = None,
-                 t_distribution : bool = False
+                 t_distribution : bool = False,
+                 t_dist_dof : int = 1
                  ) -> None:
  
         self.random_state = random_state
@@ -112,6 +114,7 @@ class generativeVAR():
         self.different_innovation_distributions = different_innovation_distributions  
         self.global_noise = global_noise 
         self.t_distribution = t_distribution
+        self.t_dist_dof = t_dist_dof
 
         if N is None and stock_names is None:
             raise ValueError("You must specify either 'N' or 'stock_names'")
@@ -292,10 +295,13 @@ class generativeVAR():
         :rtype: np.ndarray
         """
         if self.different_innovation_distributions:
-            var = invgamma.rvs(a=3,loc=0,scale=2,size=(self.N,self.Q),random_state=self.random_state)
+            # var = invgamma.rvs(a=3,loc=0,scale=2,size=(self.N,self.Q),random_state=self.random_state)
+            S = self.random_state.standard_normal(size=(self.N,self.N))
+            var_unscaled = S@S.T # Wishart 
+            var = var_unscaled/np.max(np.diag(var_unscaled)) # scale to have max variance 1
             return var 
         else:
-            var = self.global_noise*np.ones((self.N,self.Q))
+            var = self.global_noise*np.identity(self.N) 
             return var 
 
     def generate(self) -> np.ndarray: 
@@ -308,13 +314,17 @@ class generativeVAR():
         X = np.zeros((self.N,self.Q))
         if self.t_distribution:
             for t in range(self.T): 
-                Z = t_dist.rvs(df=1,scale=self.global_noise,size=(self.N,self.Q))
-                X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
-                X_stored[t] = X
+                for q in range(self.Q):
+
+                    Z_object = multivariate_t(df=self.t_dist_dof,shape=self.innovations_variance,seed=self.random_state)
+                    Z = Z_object.rvs(size=1).reshape((self.N,1))
+                    X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
+                    X_stored[t,q] = X[0]
 
         else:
             for t in range(self.T): 
-                Z = self.random_state.normal(0,np.sqrt(self.innovations_variance)) 
-                X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
-                X_stored[t] = X
+                for q in range(self.Q):
+                    Z = self.random_state.multivariate_normal(mean=np.zeros((self.N)),cov=self.innovations_variance).reshape((self.N,1))
+                    X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
+                    X_stored[t,:,q] = X[0]
         return X_stored 

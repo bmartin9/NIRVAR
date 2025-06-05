@@ -1,0 +1,13 @@
+{
+'SEED':'4436'
+'Q':'1'
+'n_backtest_days':'240'
+'first_prediction_day':'480'
+'target_feature':'0'
+'SVD_niter':'7'
+'SVD_random_state':'435'
+'quantile':'1'
+'embedding_method':'Pearson Correlation'
+'lookback_window':'480'
+'p':'1'
+}

@@ -424,7 +424,6 @@ class fit():
             all_labels[q] = labels
             similarity_matrix = self.groupings_to_2D(labels)
             constrained_distances[q] = similarity_matrix
-
         return constrained_distances, all_labels
     
     def full_UASE_gmm(self, k: int) -> np.ndarray:
