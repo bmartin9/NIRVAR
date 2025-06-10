@@ -4,7 +4,7 @@ N: 100
 T: 1000
 K: 10
 p_in: 1
-p_out: 0.02
+p_out: 0.1
 VAR_p: 1
 estimated_VAR_p : 1
 NIRVAR_p: 1
@@ -14,7 +14,7 @@ first_prediction_day: 900 # day on which you first forecast the one step ahead p
 lookback_window: 900
 t_distribution_dof: 3
 data_generating_process: "NIRVARp"
-prediction_model: "BayesianVAR"   
+prediction_model: "VARp"   
 VAR_spectral_radius: 0.9
 NIRVAR_spectral_radius: 0.9
 heavy_tailed_errors: FALSE

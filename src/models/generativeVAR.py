@@ -253,7 +253,17 @@ class generativeVAR():
         keys = [str(x) for x in range(self.N)]
         cat = dict(zip(keys,vals))
         return cat
- 
+    
+    def _block_means(self) -> np.ndarray:
+        """
+        Produce the sequence  [+1, -1, +2, -2, +3, -3, …]  of length B.
+        """
+        idx   = np.arange(self.B)          # 0,1,2,3,…
+        mags  = idx // 2 + 1               # 1,1,2,2,3,3,…
+        signs = (-1) ** idx                # +1,-1,+1,-1,+1,…
+        return signs * mags 
+    
+    
     def phi_blocks_distribution(self):
         """ 
         :return:  phi_dense.
@@ -266,8 +276,8 @@ class generativeVAR():
         random_negative_mean = np.where(random_negative_mean==1,-1,1)
         for i in range(self.N):
             mean = random_negative_mean[list(self.categories.values())[i]]*list(self.categories.values())[i]
-            mean = 3*mean +10 
-            phi_dense[i] = self.random_state.normal(loc=mean,scale=1,size=(self.Q,self.N,self.Q))
+            mean = 3*mean + 10
+            phi_dense[i] = self.random_state.normal(loc=mean,scale=0.1,size=(self.Q,self.N,self.Q))
         phi_dense = np.reshape(phi_dense,(self.N*self.Q,self.N*self.Q),order='F')
         return phi_dense
 
