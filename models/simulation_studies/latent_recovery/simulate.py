@@ -219,7 +219,9 @@ for k in range(N_replicas):
                                                             Q=Q,
                                                             multiplier=spectral_radius,
                                                             global_noise=sigma,
-                                                            phi_coefficients=Phi_k[:,np.newaxis, :, np.newaxis]
+                                                            phi_coefficients=Phi_k[:,np.newaxis, :, np.newaxis],
+                                                            t_distribution= True,
+                                                            t_dist_dof=8
                                                 )
 
         X_timeseries = timeseries_generator.generate().reshape(T,N) 

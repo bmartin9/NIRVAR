@@ -25,11 +25,11 @@ with open(sys.argv[1], "r") as f:
 
 ###### CONFIG PARAMETERS ###### 
 SEED = config["SEED"]
-N = config["N"] 
+N_list = config["N_list"] 
 T = config["T"] 
 K = config["K"]
 p_in = config["p_in"]
-p_out = config["p_out"]
+p_out_list = config["p_out_list"]
 VAR_p = config["VAR_p"] 
 lasso_penalty = config["lasso_penalty"] 
 num_backtest_days = config["num_backtest_days"] 
@@ -47,7 +47,8 @@ NIRVAR_p = config['NIRVAR_p']
 num_replicas = config['num_replicas']
 estimated_VAR_p = config['estimated_VAR_p'] 
 
-rng = default_rng(SEED)
+num_N = len(N_list)
+num_pout = len(p_out_list)
 
 ###### UTILITY FUNCTIONS ######
 def random_stable_var(
@@ -366,100 +367,6 @@ def generate_NIRVAR_data(
     return y[burnin:]
 
     
-    
-
-
-###### DATA GENERATION ######
-if heavy_tailed_errors:
-    if data_generating_process == "VARp":
-        X_generated, _, _ = random_stable_var_t(
-            dim=N,
-            num_lags=VAR_p,
-            num_time_points=T,
-            target_rho=VAR_spectral_radius,
-            coeff_sd=std_VAR_coefficients,
-            df=t_distribution_dof,
-            func_rng=rng
-        )
-
-    elif data_generating_process == "NIRVARp": 
-        Phi = generate_NIRVAR_coefficients(
-            N=N,
-            K=K,
-            p_in=p_in,
-            p_out=p_out,
-            num_lags=1,
-            NIRVAR_spectral_radius=NIRVAR_spectral_radius,
-            rng=rng
-        )
-        
-        X_generated = generate_NIRVAR_data(
-            T=T,
-            N=N,
-            Phi=Phi,
-            num_lags=NIRVAR_p,
-            target_rho=NIRVAR_spectral_radius,
-            burnin=VAR_burnin,
-            Sigma_type="Wishart",
-            rng=rng,
-            heavy_tailed_errors=True,
-            t_distribution_dof=t_distribution_dof
-        )
-
-
-else:
-    if data_generating_process == "VARp":
-        X_generated, _, _ = random_stable_var(
-            dim=N,
-            num_lags=VAR_p,
-            num_time_points=T,
-            target_rho=VAR_spectral_radius,
-            coeff_sd=std_VAR_coefficients,
-            func_rng=rng
-        )
-
-    elif data_generating_process == "NIRVARp": 
-
-        Phi = generate_NIRVAR_coefficients(
-            N=N,
-            K=K,
-            p_in=p_in,
-            p_out=p_out,
-            num_lags=NIRVAR_p,
-            NIRVAR_spectral_radius=NIRVAR_spectral_radius,
-            rng=rng
-        )
-        
-        X_generated = generate_NIRVAR_data(
-            T=T,
-            N=N,
-            Phi=Phi,
-            num_lags=1,
-            target_rho=NIRVAR_spectral_radius,
-            burnin=VAR_burnin,
-            Sigma_type="Wishart",
-            rng=rng
-        )
-
-
-###### VISUALIZATION ######
-import plotly.graph_objects as go
-
-fig = go.Figure(
-    data=[go.Scatter(y=X_generated[:, 0], mode='lines', line=dict(color='black'))],
-    layout=go.Layout(
-        yaxis=dict(showline=True, linewidth=1, linecolor='black', ticks='outside', mirror=True),
-        xaxis=dict(showline=True, linewidth=1, linecolor='black', ticks='outside', mirror=True, automargin=True),
-        paper_bgcolor='white',
-        plot_bgcolor='white',
-        font_family="Serif",
-        font_size=11,
-        margin=dict(l=5, r=5, t=5, b=5),
-        width=500,
-        height=350
-    )
-)
-fig.show()
 
 ###### FUNCTIONS TO ESTIMATE MODELS ######
 def estimate_var_no_intercept(data: np.ndarray, p: int
@@ -590,124 +497,229 @@ def estimate_var_lasso(
 
     return A_list, y_hat_next, alpha_used
 
-###### BACKTESTING ###### 
-# Get a list of days to do backtesting on
-days_to_backtest = [int(first_prediction_day + i) for i in range(num_backtest_days)]
-print(f"Days to backtest: {days_to_backtest}")
+mspe_values = np.zeros((num_N,num_pout,num_replicas))
+std_values = np.zeros((num_N,num_pout,num_replicas)) 
 
-mspe_values = np.zeros((num_replicas))
-std_values = np.zeros((num_replicas))
+rng = default_rng(SEED)
 
-for s in range(num_replicas): 
-    if prediction_model == "VARp":
-        predictions = np.zeros((num_backtest_days,N)) 
-        for t, day in enumerate(days_to_backtest):
-            X_train = X_generated[day-lookback_window:day+1, :] # day is the day on which you predict tomorrow's returns from 
-            A_list, y_hat_next = estimate_var_no_intercept(X_train, estimated_VAR_p) 
-            predictions[t] = y_hat_next
-        
+for i, N in enumerate(N_list):
+    for j, p_out in enumerate(p_out_list):
+        for replica in range(num_replicas):
+            # rng = default_rng(SEED)
 
-    elif prediction_model == "VARp_LASSO":
-        predictions = np.zeros((num_backtest_days,N)) 
-        for t, day in enumerate(days_to_backtest):
-            print(t)
-            X_train = X_generated[day-lookback_window:day+1, :] # day is the day on which you predict tomorrow's returns from 
-            A_list, y_hat_next, alpha_used = estimate_var_lasso(X_train, VAR_p, cv=True, cv_folds=5, random_state=4266) 
-            predictions[t] = y_hat_next
+            print(f"Running simulation with N={N}, p_out={p_out}, replica={replica+1}/{num_replicas}")
 
-    elif prediction_model == "NIRVAR1":
-        predictions = np.zeros((num_backtest_days,N)) 
-        for t, day in enumerate(days_to_backtest):
-            X_train = X_generated[day-lookback_window:day+1, :, np.newaxis] # day is the day on which you predict tomorrow's returns from 
-            NIRVAR_embedding = train_model.Embedding(y=X_train,
-                                                    d=K,
-                                                    embedding_method='Pearson Correlation',
-                                                    cutoff_feature=0)
-            d_hat = NIRVAR_embedding.d 
-            correlation_matrix = NIRVAR_embedding.covariance_matrix()
-            embedded_array = NIRVAR_embedding.embed_corr_matrix(corr_matrix=correlation_matrix,n_iter=20,random_state=345)
-            fit_NIRVAR = train_model.fit(embedded_array=embedded_array,
-                                        training_set=X_train,
-                                        target_feature=0,
-                                        UASE_dim=d_hat)
-            gmm_groups  = fit_NIRVAR.gmm(k=d_hat)[0]
-            ols_params = fit_NIRVAR.ols_parameters(constrained_array=gmm_groups)[:,:,0]
-            y_hat_next = ols_params@X_train[-1,:,0].T
-            predictions[t] = y_hat_next
-        
+            ###### DATA GENERATION ######
+            if heavy_tailed_errors:
+                if data_generating_process == "VARp":
+                    X_generated, _, _ = random_stable_var_t(
+                        dim=N,
+                        num_lags=VAR_p,
+                        num_time_points=T,
+                        target_rho=VAR_spectral_radius,
+                        coeff_sd=std_VAR_coefficients,
+                        df=t_distribution_dof,
+                        func_rng=rng
+                    )
 
-    elif prediction_model == "BayesianVAR": 
-        import pandas as pd
-        import rpy2.robjects as ro
-        from rpy2.robjects.packages import importr
-        from rpy2.robjects import pandas2ri, conversion, default_converter
-        from rpy2.robjects.conversion import localconverter
+                elif data_generating_process == "NIRVARp": 
+                    Phi = generate_NIRVAR_coefficients(
+                        N=N,
+                        K=K,
+                        p_in=p_in,
+                        p_out=p_out,
+                        num_lags=1,
+                        NIRVAR_spectral_radius=NIRVAR_spectral_radius,
+                        rng=rng
+                    )
+                    
+                    X_generated = generate_NIRVAR_data(
+                        T=T,
+                        N=N,
+                        Phi=Phi,
+                        num_lags=NIRVAR_p,
+                        target_rho=NIRVAR_spectral_radius,
+                        burnin=VAR_burnin,
+                        Sigma_type="Wishart",
+                        rng=rng,
+                        heavy_tailed_errors=True,
+                        t_distribution_dof=t_distribution_dof
+                    )
 
-        
-        BVAR = importr("BVAR")                       
 
-        # ------------------------------------------------------------------
-        # 1.  Helper: fit BVAR & get forecast for a single training window --
-        # ------------------------------------------------------------------
-        def _bvar_one_step(x_train: np.ndarray, lags: int) -> np.ndarray:
-            """
-            Fit a Minnesota-prior BVAR on x_train (T×N) and return the
-            posterior-mean 1-step-ahead forecast as a NumPy vector (N,).
-            """
-            df_py = pd.DataFrame(
-                x_train,
-                columns=[f"y{i+1}" for i in range(x_train.shape[1])]
-            )
+            else:
+                if data_generating_process == "VARp":
+                    X_generated, _, _ = random_stable_var(
+                        dim=N,
+                        num_lags=VAR_p,
+                        num_time_points=T,
+                        target_rho=VAR_spectral_radius,
+                        coeff_sd=std_VAR_coefficients,
+                        func_rng=rng
+                    )
 
-            # ---- Python → R -------------------------------------------
-            with localconverter(default_converter + pandas2ri.converter):
-                ro.globalenv["Y_train"] = conversion.py2rpy(df_py)
+                elif data_generating_process == "NIRVARp": 
 
-            ro.globalenv["p_lags"] = lags
+                    Phi = generate_NIRVAR_coefficients(
+                        N=N,
+                        K=K,
+                        p_in=p_in,
+                        p_out=p_out,
+                        num_lags=NIRVAR_p,
+                        NIRVAR_spectral_radius=NIRVAR_spectral_radius,
+                        rng=rng
+                    )
+                    
+                    X_generated = generate_NIRVAR_data(
+                        T=T,
+                        N=N,
+                        Phi=Phi,
+                        num_lags=1,
+                        target_rho=NIRVAR_spectral_radius,
+                        burnin=VAR_burnin,
+                        Sigma_type="Wishart",
+                        rng=rng
+                    )
 
-            # ---- R code -----------------------------------------------
-            ro.r("""
-                library(BVAR)
-                fit_bvar  <- bvar(Y_train, lags = p_lags, n_draw = 1000, n_burn = 500
-                                )
-                pred_bvar <- predict(fit_bvar, horizon = 1)$fcast
-                fc_mean <- apply(pred_bvar, 3, mean)  
-            """)
 
-            # ---- R → Python -------------------------------------------
-            with localconverter(default_converter + pandas2ri.converter):
-                fc_py = conversion.rpy2py(ro.r("fc_mean"))
+            ###### VISUALIZATION ######
+            # import plotly.graph_objects as go
 
-            return np.asarray(fc_py, dtype=float)    # shape (N)
-        
-        predictions = np.zeros((num_backtest_days, N))
+            # fig = go.Figure(
+            #     data=[go.Scatter(y=X_generated[:, 0], mode='lines', line=dict(color='black'))],
+            #     layout=go.Layout(
+            #         yaxis=dict(showline=True, linewidth=1, linecolor='black', ticks='outside', mirror=True),
+            #         xaxis=dict(showline=True, linewidth=1, linecolor='black', ticks='outside', mirror=True, automargin=True),
+            #         paper_bgcolor='white',
+            #         plot_bgcolor='white',
+            #         font_family="Serif",
+            #         font_size=11,
+            #         margin=dict(l=5, r=5, t=5, b=5),
+            #         width=500,
+            #         height=350
+            #     )
+            # )
+            # fig.show()
 
-        for t, day in enumerate(days_to_backtest):
-            X_train = X_generated[day - lookback_window : day + 1, :]
-            predictions[t] = _bvar_one_step(X_train, lags=estimated_VAR_p)
 
-    ###### EVALUATION ######
-    targets = X_generated[[j+1 for j in days_to_backtest], :] # tomorrow's returns
-    mspe = np.sum((targets - predictions)**2)/((N*num_backtest_days))
-    print(f"MSPE : {mspe}")
-    mspe_values[s] = mspe 
-    std = np.std(targets - predictions)
-    print(f"STD : {std}")
-    std_values[s] = std 
+            ###### BACKTESTING ###### 
+            # Get a list of days to do backtesting on
+            days_to_backtest = [int(first_prediction_day + i) for i in range(num_backtest_days)]
+            # print(f"Days to backtest: {days_to_backtest}")
 
-    x = np.arange(1, len(targets[:,0]) + 1)
+            if prediction_model == "VARp":
+                predictions = np.zeros((num_backtest_days,N)) 
+                for t, day in enumerate(days_to_backtest):
+                    X_train = X_generated[day-lookback_window:day+1, :] # day is the day on which you predict tomorrow's returns from 
+                    A_list, y_hat_next = estimate_var_no_intercept(X_train, estimated_VAR_p) 
+                    predictions[t] = y_hat_next
+                
 
-    # Create a figure and add traces for each array
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=targets[:,0], mode='lines', name='Targets'))
-    fig.add_trace(go.Scatter(x=x, y=predictions[:,0], mode='lines', name='Predictions'))
-    fig.show()
+            elif prediction_model == "VARp_LASSO":
+                predictions = np.zeros((num_backtest_days,N)) 
+                for t, day in enumerate(days_to_backtest):
+                    # print(t)
+                    X_train = X_generated[day-lookback_window:day+1, :] # day is the day on which you predict tomorrow's returns from 
+                    A_list, y_hat_next, alpha_used = estimate_var_lasso(X_train, VAR_p, cv=True, cv_folds=5, random_state=4266) 
+                    predictions[t] = y_hat_next
 
-mspe_mean = np.mean(mspe_values,axis=-1)[np.newaxis]
-mean_std = np.mean(std_values,axis=-1)[np.newaxis]
+            elif prediction_model == "NIRVAR1":
+                predictions = np.zeros((num_backtest_days,N)) 
+                for t, day in enumerate(days_to_backtest):
+                    X_train = X_generated[day-lookback_window:day+1, :, np.newaxis] # day is the day on which you predict tomorrow's returns from 
+                    NIRVAR_embedding = train_model.Embedding(y=X_train,
+                                                            d=K,
+                                                            embedding_method='Pearson Correlation',
+                                                            cutoff_feature=0)
+                    d_hat = NIRVAR_embedding.d 
+                    correlation_matrix = NIRVAR_embedding.covariance_matrix()
+                    embedded_array = NIRVAR_embedding.embed_corr_matrix(corr_matrix=correlation_matrix,n_iter=20,random_state=345)
+                    fit_NIRVAR = train_model.fit(embedded_array=embedded_array,
+                                                training_set=X_train,
+                                                target_feature=0,
+                                                UASE_dim=d_hat)
+                    gmm_groups  = fit_NIRVAR.gmm(k=d_hat)[0]
+                    ols_params = fit_NIRVAR.ols_parameters(constrained_array=gmm_groups)[:,:,0]
+                    y_hat_next = ols_params@X_train[-1,:,0].T
+                    predictions[t] = y_hat_next
+                
 
-np.savetxt(f"mspe_mean_{data_generating_process}_{prediction_model}.csv", mspe_mean, delimiter=",", fmt="%.6f")
-np.savetxt(f"mspe_std_{data_generating_process}_{prediction_model}.csv", mean_std, delimiter=",", fmt="%.6f") 
+            elif prediction_model == "BayesianVAR": 
+                import pandas as pd
+                import rpy2.robjects as ro
+                from rpy2.robjects.packages import importr
+                from rpy2.robjects import pandas2ri, conversion, default_converter
+                from rpy2.robjects.conversion import localconverter
+
+                
+                BVAR = importr("BVAR")                       
+
+                # ------------------------------------------------------------------
+                # 1.  Helper: fit BVAR & get forecast for a single training window --
+                # ------------------------------------------------------------------
+                def _bvar_one_step(x_train: np.ndarray, lags: int) -> np.ndarray:
+                    """
+                    Fit a Minnesota-prior BVAR on x_train (T×N) and return the
+                    posterior-mean 1-step-ahead forecast as a NumPy vector (N,).
+                    """
+                    df_py = pd.DataFrame(
+                        x_train,
+                        columns=[f"y{i+1}" for i in range(x_train.shape[1])]
+                    )
+
+                    # ---- Python → R -------------------------------------------
+                    with localconverter(default_converter + pandas2ri.converter):
+                        ro.globalenv["Y_train"] = conversion.py2rpy(df_py)
+
+                    ro.globalenv["p_lags"] = lags
+
+                    # ---- R code -----------------------------------------------
+                    ro.r("""
+                        library(BVAR)
+                        minnesota_prior <- bv_priors(hyper = "auto",mn=bv_mn(lambda = bv_lambda(mode = 0.2, sd = 0.4, min = 0.0001, max = 5)))
+                        fit_bvar  <- bvar(Y_train, lags = p_lags, n_draw = 1000, n_burn = 500, priors = minnesota_prior
+                                        )
+                        pred_bvar <- predict(fit_bvar, horizon = 1)$fcast
+                        fc_mean <- apply(pred_bvar, 3, mean)  
+                    """)
+
+                    # ---- R → Python -------------------------------------------
+                    with localconverter(default_converter + pandas2ri.converter):
+                        fc_py = conversion.rpy2py(ro.r("fc_mean"))
+
+                    return np.asarray(fc_py, dtype=float)    # shape (N)
+                
+                predictions = np.zeros((num_backtest_days, N))
+
+                for t, day in enumerate(days_to_backtest):
+                    X_train = X_generated[day - lookback_window : day + 1, :]
+                    predictions[t] = _bvar_one_step(X_train, lags=estimated_VAR_p)
+
+            ###### EVALUATION ######
+            targets = X_generated[[j+1 for j in days_to_backtest], :] # tomorrow's returns
+            mspe = np.sum((targets - predictions)**2)/((N*num_backtest_days))
+            print(f"MSPE : {mspe}")
+            mspe_values[i,j,replica] = mspe 
+            std = np.std(targets - predictions)
+            print(f"STD : {std}")
+            std_values[i,j,replica] = std 
+
+            # x = np.arange(1, len(targets[:,0]) + 1)
+
+            # Create a figure and add traces for each array
+            # fig = go.Figure()
+            # fig.add_trace(go.Scatter(x=x, y=targets[:,0], mode='lines', name='Targets'))
+            # fig.add_trace(go.Scatter(x=x, y=predictions[:,0], mode='lines', name='Predictions'))
+            # fig.show()
+if num_replicas>1:
+    mean_mspe = np.mean(mspe_values, axis=-1)
+    std_mspe = np.std(std_values, axis=-1)
+else:
+    mean_mspe = mspe_values[:,:,0]
+    std_mspe = std_values[:,:,0]
+
+np.savetxt(f"mspe_mean_{data_generating_process}_{prediction_model}.csv", mean_mspe.T, delimiter=",", fmt="%.6f")
+np.savetxt(f"mspe_std_{data_generating_process}_{prediction_model}.csv", std_mspe.T, delimiter=",", fmt="%.6f") 
 
 
 

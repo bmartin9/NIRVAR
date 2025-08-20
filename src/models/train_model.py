@@ -488,6 +488,36 @@ class fit():
         ols_params = np.reshape(ols_params,(self.N,self.N,self.Q),order='F') 
         return ols_params 
     
+    def ols_parameters_NIRVARp(self,constrained_array : np.ndarray,p:int) -> np.ndarray:
+        """ 
+        OLS on NIRVAR(p) model assuming the constraints are the same for each lag. Currently, this covers the Q=1 case only.
+
+        :param constrained_array: Some constraint on which neighbours to sum up to get a predictor along that feature. Shape= (N,N)
+        :type: np.ndarray
+
+        :param p: The lag order of the NIRVAR model. Must be an integer.
+        :type: int
+
+        :return: ols_params Shape = (N,N,p)
+        :rtype: np.ndarray
+        """
+        ols_params = np.zeros((self.N,self.N*p)) 
+        covariates = self.covariates(constrained_array=constrained_array)
+        targets = self.training_set[:,:,self.target_feature] # shape = (T_train,N)
+        for i in range(self.N):
+            ols_reg_object = LinearRegression(fit_intercept=False)
+            x = covariates[i].reshape(-1,covariates[i].shape[-1],order='F').T[:-1,:] #shape = (T_train-1,NQ)
+            non_zero_col_indices = np.where(x.any(axis=0))[0] #only do ols on stocks that are connected to node i
+            x_reg = x[:,non_zero_col_indices]
+            X = np.hstack([x_reg[p - j - 1 : self.T_train - j - 1, :] for j in range(p)])
+            y = targets[p:,i] 
+            ols_fit = ols_reg_object.fit(X,y) 
+            coef = ols_fit.coef_.reshape(p, -1)
+            idx = (np.arange(p)[:, None] * self.N) + non_zero_col_indices[None, :]
+            ols_params[i, idx.ravel("C")] = coef.ravel("C")
+        ols_params = ols_params.reshape(self.N, p, self.N).transpose(0, 2, 1)  # (N, N, p)
+        return ols_params 
+    
     def lasso_parameters(self,constrained_array : np.ndarray) -> np.ndarray:
         """ 
         :param constrained_array: Some constraint on which neighbours to sum up to get a predictor along that feature. Shape= (Q,N,N)

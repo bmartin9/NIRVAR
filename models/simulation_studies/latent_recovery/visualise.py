@@ -122,14 +122,14 @@ Y_contour_block2 = X_S_block2_contour_data[:, 1]
 
 # Create a scatter plot for X_S_contour_data in blue
 fig_contour = go.Figure()
-fig_contour.add_trace(go.Scatter(x=X_contour, y=Y_contour, mode='markers', marker=dict(color=colors[0]), name='$\\hat{\\Psi}_{i}$'))
+# fig_contour.add_trace(go.Scatter(x=X_contour, y=Y_contour, mode='markers', marker=dict(color=colors[0]), name='$\\hat{\\Psi}_{i}$'))
 
-# fig_contour.add_trace(go.Scatter(x=X_contour_block1, y=Y_contour_block1, mode='markers', marker=dict(color=colors[0]), name='$\\hat{\\Psi}_{1:150}$'))
-# fig_contour.add_trace(go.Scatter(x=X_contour_block2, y=Y_contour_block2, mode='markers', marker=dict(color=colors[2]), name='$\\hat{\\Psi}_{151:300}$'))
+fig_contour.add_trace(go.Scatter(x=X_contour_block1, y=Y_contour_block1, mode='markers', marker=dict(color=colors[0]), name='$\\hat{\\Psi}_{1:75}$'))
+fig_contour.add_trace(go.Scatter(x=X_contour_block2, y=Y_contour_block2, mode='markers', marker=dict(color=colors[2]), name='$\\hat{\\Psi}_{76:150}$'))
 
 # Create a scatter plot for X_Gamma_contour_loc in red
 fig_contour.add_trace(go.Scatter(x=[X_gt_loc[0]], y=[X_gt_loc[1]], mode='markers', marker=dict(color=colors[1]), name='$\\theta_{B1}$'))
-# fig_contour.add_trace(go.Scatter(x=[X_gt_loc_block2[0]], y=[X_gt_loc_block2[1]], mode='markers', marker=dict(color=colors[3]), name='$\\theta_{B2}$'))
+fig_contour.add_trace(go.Scatter(x=[X_gt_loc_block2[0]], y=[X_gt_loc_block2[1]], mode='markers', marker=dict(color=colors[3]), name='$\\theta_{B2}$'))
 
 layout = go.Layout(
     yaxis=dict(title=r'Second principle direction', showline=True, linewidth=1, linecolor='black',ticks='outside',mirror=True),

@@ -1,0 +1,3 @@
+Investigate NIRVAR estimation when the DGP is a NIRVAR(p) with p>1. The coefficient matrices are sampled from a SBM with the same expected adjacency matrix.
+Look at group recovery by computing the ARI between the NIRVAR estimated groups and the ground truth clusters for different values of spectral radius and T.
+Look at forecasting performance when the prediction model is NIRVAR(1) vs NIRVAR(p). 

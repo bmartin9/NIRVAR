@@ -274,6 +274,7 @@ class generativeVAR():
         phi_dense = np.zeros((self.N,self.Q,self.N,self.Q))
         random_negative_mean = self.random_state.binomial(1,0.5,size=(self.B))
         random_negative_mean = np.where(random_negative_mean==1,-1,1)
+        print(list(self.categories.values()))
         for i in range(self.N):
             mean = random_negative_mean[list(self.categories.values())[i]]*list(self.categories.values())[i]
             mean = 3*mean + 10
@@ -329,12 +330,12 @@ class generativeVAR():
                     Z_object = multivariate_t(df=self.t_dist_dof,shape=self.innovations_variance,seed=self.random_state)
                     Z = Z_object.rvs(size=1).reshape((self.N,1))
                     X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
-                    X_stored[t,q] = X[0]
+                    X_stored[t,:,q] = X[:,0]
 
         else:
             for t in range(self.T): 
                 for q in range(self.Q):
                     Z = self.random_state.multivariate_normal(mean=np.zeros((self.N)),cov=self.innovations_variance).reshape((self.N,1))
-                    X = np.sum(np.sum(self.phi_coefficients*X,axis=2),axis=2) + Z 
-                    X_stored[t,:,q] = X[0]
+                    X = (self.phi_coefficients[:,0,:,0]@X[:,0]).reshape((self.N,1)) + Z
+                    X_stored[t,:,q] = X[:,0]
         return X_stored 

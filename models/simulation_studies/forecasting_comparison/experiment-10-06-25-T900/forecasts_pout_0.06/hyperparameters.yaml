@@ -1,0 +1,23 @@
+# HYPERPARAMETERS
+SEED: 4583
+N: 100
+T: 1000
+K: 10
+p_in: 1
+p_out: 0.06
+VAR_p: 1
+estimated_VAR_p : 1
+NIRVAR_p: 1
+lasso_penalty: 0.05  
+num_backtest_days: 50
+first_prediction_day: 900 # day on which you first forecast the one step ahead prediction
+lookback_window: 900
+t_distribution_dof: 3
+data_generating_process: "NIRVARp"
+prediction_model: "BayesianVAR"   
+VAR_spectral_radius: 0.9
+NIRVAR_spectral_radius: 0.9
+heavy_tailed_errors: FALSE
+std_VAR_coefficients: 0.5
+VAR_burnin: 100
+num_replicas : 1 
