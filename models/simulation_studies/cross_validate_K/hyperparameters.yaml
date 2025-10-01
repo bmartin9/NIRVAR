@@ -1,0 +1,13 @@
+# HYPERPARAMETERS
+SEED: 45839
+N: 75
+T: 2400
+K: 10
+p_in: 1
+p_out: 0
+num_backtest_days: 400
+first_prediction_day: 1900 # day on which you first forecast the one step ahead prediction
+lookback_window: 1900
+spectral_radius: 0.7
+num_replicas : 1
+K_hat_list: [5,6,7,8,9,10,11,12,13,14,15]

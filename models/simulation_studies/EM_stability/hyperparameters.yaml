@@ -1,0 +1,9 @@
+# HYPERPARAMETERS
+DGP_SEED: 4583
+N: 100
+T: 3000
+K: 2
+p_in: 0.9
+p_out: 0.1
+spectral_radius: 0.9
+num_SEEDS : 100

@@ -274,7 +274,6 @@ class generativeVAR():
         phi_dense = np.zeros((self.N,self.Q,self.N,self.Q))
         random_negative_mean = self.random_state.binomial(1,0.5,size=(self.B))
         random_negative_mean = np.where(random_negative_mean==1,-1,1)
-        print(list(self.categories.values()))
         for i in range(self.N):
             mean = random_negative_mean[list(self.categories.values())[i]]*list(self.categories.values())[i]
             mean = 3*mean + 10
@@ -333,6 +332,7 @@ class generativeVAR():
                     X_stored[t,:,q] = X[:,0]
 
         else:
+            print("Gaussian Errors")
             for t in range(self.T): 
                 for q in range(self.Q):
                     Z = self.random_state.multivariate_normal(mean=np.zeros((self.N)),cov=self.innovations_variance).reshape((self.N,1))

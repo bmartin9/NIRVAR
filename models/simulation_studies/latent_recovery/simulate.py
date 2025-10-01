@@ -104,7 +104,8 @@ gt_generator = generativeVAR.generativeVAR(random_state=random_state,
                                            B=B,
                                            Q=Q,
                                            multiplier=spectral_radius,
-                                           global_noise=sigma
+                                           global_noise=sigma,
+                                           different_innovation_distributions= False,
                                            )
 
 block_assignments_dict = gt_generator.categories
@@ -199,9 +200,62 @@ elif H == "Bernoulli":
         Phi1[X_inner_product > random_uniform] = 1
         Phi[s] = Phi1
 
+
+###### Generate Innovarions Covariance Matrix ######
+def make_cov(kind: str, N: int, rho: float = 0.0) -> np.ndarray:
+    """
+    kind ∈ {"homoskedastic", "hetero-diag", "hetero-constant", "AR"}.
+      homoskedastic    -> I_N
+      homo-constant  -> diag(1) on diagonal, rho off-diagonal
+      hetero-diag      -> diag(linspace(50, 100, N))
+      hetero-constant  -> diag(linspace(50, 100, N)) on diagonal, rho off-diagonal
+      AR               -> Σ_{ij} = rho**|i-j|
+    rho > 0 is used by 'hetero-constant' and 'AR'.
+    """
+    if N <= 0:
+        raise ValueError("N must be positive.")
+    kind = kind.lower()
+
+    if kind == "homoskedastic":
+        return np.eye(N, dtype=float)
+    
+    if kind == "homo-constant":
+        # if rho < 0:
+            # raise ValueError("rho must be nonnegative for 'hetero-constant'.")
+        Sigma = np.full((N, N), float(rho))
+        np.fill_diagonal(Sigma, 1)
+        return Sigma
+
+    if kind == "hetero-diag":
+        return np.diag(np.linspace(0.5, 1, N))
+        # return np.diag(np.random.rand((N)))
+
+    if kind == "hetero-constant":
+        if rho < 0:
+            raise ValueError("rho must be nonnegative for 'hetero-constant'.")
+        Sigma = np.full((N, N), float(rho))
+        # np.fill_diagonal(Sigma, np.linspace(0.5, 1, N))
+        np.fill_diagonal(Sigma, np.random.uniform(low=0.5,high=1,size=(N)))
+        return Sigma
+
+    if kind == "ar":
+        if rho < 0:
+            raise ValueError("rho must be nonnegative for 'AR'.")
+        idx = np.arange(N)
+        return rho ** np.abs(idx[:, None] - idx[None, :])
+
+    raise ValueError(f"Unknown kind: {kind!r}")
+
+var_homo = make_cov(kind="homoskedastic", N=N)
+var_homo_const = make_cov(kind="homo-constant",N=N,rho=0.005)
+var_hetero_diag = make_cov(kind="hetero-diag",N=N)
+var_hetero_constant = make_cov(kind="hetero-constant",N=N,rho=0.25)
+var_AR = make_cov(kind="AR",N=N,rho=0.5) 
+
 proc_Gamma = Procrustes(X_Gamma) 
 proc_X = Procrustes(X) 
 proc_Phi = Procrustes(X_Phi) 
+
 for k in range(N_replicas):
     Phi_k = Phi[k]
     #You need to rescale the Phi sample so that the spectral radius is less than 1
@@ -221,7 +275,9 @@ for k in range(N_replicas):
                                                             global_noise=sigma,
                                                             phi_coefficients=Phi_k[:,np.newaxis, :, np.newaxis],
                                                             t_distribution= True,
-                                                            t_dist_dof=8
+                                                            t_dist_dof=7,
+                                                            different_innovation_distributions= False,
+                                                            innovations_variance=var_hetero_constant
                                                 )
 
         X_timeseries = timeseries_generator.generate().reshape(T,N) 

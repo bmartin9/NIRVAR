@@ -311,7 +311,7 @@ def generate_NIRVAR_data(
     t_distribution_dof: float = 5,
     burnin: int = 200,
     heavy_tailed_errors: bool = False,
-    Sigma_type: str = "Wishart", # "Wishart" or "Identity"
+    Sigma_type: str = "Identity", # "Wishart" or "Identity"
     rng: np.random.Generator | None = None,
 ) -> np.ndarray:
     """
@@ -619,9 +619,18 @@ for i, N in enumerate(N_list):
                 predictions = np.zeros((num_backtest_days,N)) 
                 for t, day in enumerate(days_to_backtest):
                     # print(t)
-                    X_train = X_generated[day-lookback_window:day+1, :] # day is the day on which you predict tomorrow's returns from 
-                    A_list, y_hat_next, alpha_used = estimate_var_lasso(X_train, VAR_p, cv=True, cv_folds=5, random_state=4266) 
-                    predictions[t] = y_hat_next
+                    alpha_cv = 0.32
+                    if t==-1:
+                        X_train = X_generated[day-lookback_window:day+1, :] # day is the day on which you predict tomorrow's returns from 
+                        A_list, y_hat_next, alpha_used = estimate_var_lasso(X_train, VAR_p, cv=True, cv_folds=5, random_state=4266) 
+                        print(alpha_used)
+                        alpha_cv += alpha_used
+                        predictions[t] = y_hat_next
+                    else:
+                        print(t)
+                        X_train = X_generated[day-lookback_window:day+1, :] # day is the day on which you predict tomorrow's returns from 
+                        A_list, y_hat_next, alpha_used = estimate_var_lasso(X_train, VAR_p, cv=False, alpha=alpha_cv, random_state=4266) 
+                        predictions[t] = y_hat_next
 
             elif prediction_model == "NIRVAR1":
                 predictions = np.zeros((num_backtest_days,N)) 
